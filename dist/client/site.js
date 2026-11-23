@@ -10,7 +10,37 @@ const pic=(name,lazy=true)=>`<img src="photos/${name}.jpg" alt="${titles[name]}"
 const cards=()=>`<div class="grid">${projects.map(p=>`<a class="card" href="projects.html?collection=${p.slug}">${pic(p.cover)}<h3>${p.title}</h3><span class="meta">${p.kind}</span></a>`).join('')}</div>`;
 const nav=document.querySelector('nav');
 nav.querySelector('[data-nav="'+page+'"]')?.setAttribute('aria-current','page');
-if(page==='home')main.innerHTML=`<section class="hero"><div><p class="label">Bogdan Maliagin · Photography</p><h1>Adventure<br><em>photography.</em></h1><p class="intro">People and landscapes, photographed in the field. Available throughout Finland and internationally.</p><div class="actions"><a class="btn" href="projects.html">Explore projects</a><a class="textbtn" href="pricing.html">View pricing</a></div></div><figure><a href="projects.html?collection=high-ground">${pic('hero',false)}</a><figcaption class="caption"><span>High Ground</span><span>Mountains &amp; people</span></figcaption></figure></section><section class="section"><div class="row"><h2>Selected projects</h2><a class="textbtn" href="projects.html">View all projects</a></div>${cards()}</section>`;
+if (page === 'home') {
+  const featured = projects.map(project => `
+    <a class="card" href="projects.html?collection=${project.slug}">
+      ${pic(project.slug === 'high-ground' ? 'climb' : project.cover)}
+      <h3>${project.title}</h3>
+      <span class="meta">${project.kind}</span>
+    </a>
+  `).join('');
+
+  main.innerHTML = `
+    <section class="hero" aria-labelledby="home-title">
+      <figure class="opening-photo">
+        <a href="projects.html?collection=high-ground">
+          <img src="photos/hero.jpg" width="1200" height="800" fetchpriority="high" alt="${titles.hero}">
+        </a>
+        <figcaption>High Ground</figcaption>
+      </figure>
+      <div class="opening-copy">
+        <h1 id="home-title">Adventure<br>photography</h1>
+        <div>
+          <p class="intro">People and landscapes, photographed in the field. Available throughout Finland and internationally.</p>
+          <a class="textbtn" href="projects.html">Explore projects</a>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <h2>Selected projects</h2>
+      <div class="grid opening-projects">${featured}</div>
+    </section>
+  `;
+}
 const project=projects.find(p=>p.slug===new URLSearchParams(location.search).get('collection'));
 if(page==='projects' && project){document.title=project.title+' | Bogdan Maliagin';main.innerHTML=`<div class="head"><a class="textbtn" href="projects.html">All projects</a><h1>${project.title}</h1><p class="intro">${project.kind}</p></div><section class="section gallery">${project.photos.map(n=>`<button data-photo="${n}" title="Enlarge photograph">${pic(n)}</button>`).join('')}</section>`;}
 else if(page==='projects')main.innerHTML=`<div class="head"><div class="label">Bogdan Maliagin</div><h1>Projects</h1></div><section class="section">${cards()}</section>`;
