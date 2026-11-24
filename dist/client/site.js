@@ -19,8 +19,41 @@ const titles={hero:'A lone figure above the turquoise fjord',climb:'A climber on
 const page=document.body.dataset.page;
 const main=document.querySelector('main');
 Object.assign(titles, ktmPhotoTitles);
-const pic=(name,lazy=true)=>`<img src="photos/${name}${Object.hasOwn(ktmPhotoTitles, name) ? '-preview' : ''}.jpg" alt="${titles[name]}" ${lazy?'loading="lazy"':''}>`;
+const previewSource = name => `photos/${name}${Object.hasOwn(ktmPhotoTitles, name) ? '-preview' : ''}.jpg`;
+const pic=(name,lazy=true)=>`<img src="${previewSource(name)}" alt="${titles[name]}" ${lazy?'loading="lazy"':''}>`;
 const cards=()=>`<div class="grid">${projects.map(p=>`<a class="card" href="projects.html?collection=${p.slug}">${pic(p.cover)}<h3>${p.title}</h3><span class="meta">${p.kind}</span></a>`).join('')}</div>`;
+
+function photoMarquee() {
+  const rows = [
+    [['carousel-greece', 16, 9, 'A road above the Greek coastline at sunset'],
+     ['people', 2, 3], ['ktm-DSC03947', 16, 9], ['bridge', 3, 2],
+     ['climb', 9, 16], ['road', 3, 2], ['ktm-DSC04254', 9, 16],
+     ['harbor', 3, 2], ['ktm-DSC04396', 16, 9]],
+    [['ktm-DSC04224', 16, 9], ['carousel-model', 9, 16, 'A woman in a floral dress in a lane by the sea'],
+     ['hero', 3, 2], ['ktm-DSC04086', 9, 16], ['sail', 3, 2],
+     ['twilight', 16, 9], ['ride', 9, 16], ['ktm-DSC04123', 16, 9], ['skyline', 3, 2]],
+    [['peaks', 16, 9], ['couple', 9, 16, 'A portrait of a couple'],
+     ['ktm-DSC04300', 16, 9], ['coastal', 16, 9], ['motorcycle', 1, 1],
+     ['rainbow', 3, 2], ['ktm-DSC04250', 9, 16], ['tracks', 16, 9], ['ktm-DSC03946', 16, 9]]
+  ];
+
+  return `<div class="photo-marquee" aria-label="Portfolio photographs" role="region">
+    <div class="photo-marquee-controls">
+      <button class="photo-marquee-toggle" type="button">Pause motion</button>
+    </div>
+    ${rows.map((row, index) => {
+      const frames = row.map(([name, width, height, caption]) => {
+        return `<li class="photo-frame"><img src="${previewSource(name)}" alt="${caption ?? titles[name]}"
+          style="aspect-ratio:${width}/${height}" loading="lazy" decoding="async"></li>`;
+      }).join('');
+      return `<div class="photo-marquee-row" role="group" aria-label="Photo row ${index + 1}"><div class="photo-marquee-track">
+        <ul class="photo-marquee-strip" role="list">${frames}</ul>
+        <ul class="photo-marquee-strip" aria-hidden="true">${frames}</ul>
+      </div></div>`;
+    }).join('')}
+  </div>`;
+}
+
 const nav=document.querySelector('nav');
 nav.querySelector('[data-nav="'+page+'"]')?.setAttribute('aria-current','page');
 if (page === 'home') {
@@ -60,30 +93,7 @@ if (page === 'home') {
             </a>
           </figure>
         </div>
-        <figure class="essay-coast">
-          <img src="photos/carousel-greece.jpg"
-               srcset="photos/carousel-greece.jpg 960w, photos/carousel-greece-1800.jpg 1800w,
-                       photos/carousel-greece-2880.jpg 2880w"
-               sizes="(max-width: 640px) calc(100vw - 32px), min(91vw, 1440px)"
-               width="960" height="540" loading="lazy"
-               alt="A road above the Greek coastline at sunset">
-        </figure>
-        <div class="essay-pair">
-          <figure>
-            <img src="photos/carousel-ktm.jpg"
-                 srcset="photos/carousel-ktm.jpg 960w, photos/carousel-ktm-1920.jpg 1920w"
-                 sizes="(max-width: 640px) calc(100vw - 32px), min(52vw, 640px)"
-                 width="960" height="540" loading="lazy"
-                 alt="A motorcycle rider on a wooded trail">
-          </figure>
-          <figure>
-            <img src="photos/carousel-model.jpg"
-                 srcset="photos/carousel-model.jpg 540w, photos/carousel-model-1080.jpg 1080w"
-                 sizes="(max-width: 640px) min(78vw, 360px), min(29vw, 360px)"
-                 width="540" height="960" loading="lazy"
-                 alt="A woman in a floral dress in a lane by the sea">
-          </figure>
-        </div>
+        ${photoMarquee()}
         <div class="essay-action">
           <a class="project-cta" href="projects.html"><span>Explore projects</span></a>
         </div>
@@ -102,6 +112,31 @@ if (page === 'home') {
       </section>
     </div>
   `;
+
+  const marquee = main.querySelector('.photo-marquee');
+  const motionToggle = marquee.querySelector('.photo-marquee-toggle');
+  motionToggle.addEventListener('click', () => {
+    const paused = marquee.toggleAttribute('data-paused');
+    motionToggle.textContent = paused ? 'Resume motion' : 'Pause motion';
+  });
+
+  if ('IntersectionObserver' in window) {
+    marquee.setAttribute('data-offscreen', '');
+    const observer = new IntersectionObserver(([entry]) => {
+      marquee.toggleAttribute('data-offscreen', !entry.isIntersecting);
+    });
+    observer.observe(marquee);
+  }
+
+  const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
+  const updateScrollFocus = () => {
+    marquee.querySelectorAll('.photo-marquee-row').forEach(row => {
+      if (motionPreference.matches) row.setAttribute('tabindex', '0');
+      else row.removeAttribute('tabindex');
+    });
+  };
+  updateScrollFocus();
+  motionPreference.addEventListener('change', updateScrollFocus);
 }
 const project=projects.find(p=>p.slug===new URLSearchParams(location.search).get('collection'));
 if(page==='projects' && project){document.title=project.title+' | Bogdan Maliagin';main.innerHTML=`<div class="head"><a class="textbtn" href="projects.html">All projects</a><h1>${project.title}</h1><p class="intro">${project.kind}</p></div><section class="section gallery">${project.photos.map(n=>`<button data-photo="${n}" title="Enlarge photograph">${pic(n)}</button>`).join('')}</section>`;}
