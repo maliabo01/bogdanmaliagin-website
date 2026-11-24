@@ -93,9 +93,7 @@ body[data-page="home"] .masthead {
   background: var(--bg);
 }
 .photo-essay {
-  --essay-spacing: clamp(64px, 12vw, 176px);
-  max-width: 1440px;
-  margin-inline: auto;
+  --essay-spacing: clamp(56px, 8vw, 116px);
 }
 .essay-opening {
   display: grid;
@@ -106,7 +104,7 @@ body[data-page="home"] .masthead {
   margin-inline: auto;
   padding-block: clamp(56px, 8vw, 116px) var(--essay-spacing);
 }
-.photo-essay img {
+.essay-climber img {
   display: block;
   width: 100%;
   height: auto;
@@ -115,24 +113,80 @@ body[data-page="home"] .masthead {
   width: min(100%, 420px);
   justify-self: end;
 }
-.essay-climber a {
-  display: block;
-}
-.essay-climber span {
-  display: inline-block;
+.essay-climber figcaption {
   margin-top: 14px;
   font-size: .875rem;
 }
-.essay-pair {
+.photo-marquee {
+  --photo-height: clamp(138px, 19vw, 266px);
+  --frame-mat: clamp(7px, 1vw, 15px);
+  --frame-gap: clamp(8px, .95vw, 14px);
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, .85fr);
-  align-items: start;
-  gap: clamp(28px, 10vw, 150px);
-  max-width: 1100px;
-  margin: var(--essay-spacing) auto 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--frame-gap);
+  margin-inline: calc(-1 * var(--page-gutter));
 }
-.essay-pair figure:last-child {
-  margin-top: clamp(48px, 12vw, 176px);
+.photo-marquee-row {
+  width: 100%;
+  max-width: 2400px;
+  margin-inline: auto;
+  overflow: hidden;
+  overflow: clip;
+}
+.photo-marquee-track,
+.photo-marquee-strip {
+  display: flex;
+  width: max-content;
+}
+.photo-marquee-track {
+  animation: photo-roll 176s linear infinite;
+}
+.photo-marquee-row:nth-of-type(2) .photo-marquee-track {
+  animation-direction: reverse;
+  animation-delay: -5s;
+}
+.photo-marquee-row:nth-of-type(3) .photo-marquee-track {
+  animation-delay: -2s;
+}
+.photo-marquee[data-offscreen] .photo-marquee-track {
+  animation-play-state: paused;
+}
+.photo-marquee-strip {
+  flex: none;
+  gap: var(--frame-gap);
+  margin: 0;
+  padding: 0 var(--frame-gap) 0 0;
+  list-style: none;
+}
+.photo-frame {
+  flex: none;
+  padding: var(--frame-mat);
+  background: #fff;
+}
+.photo-frame img {
+  display: block;
+  width: auto;
+  height: var(--photo-height);
+  object-fit: contain;
+  background: #e9e8e5;
+}
+@keyframes photo-roll {
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-marquee-strip[aria-hidden="true"] {
+    display: none;
+  }
+  .photo-marquee-row {
+    overflow-x: auto;
+  }
+  .photo-marquee-row:focus-visible {
+    outline: 2px solid white;
+    outline-offset: -2px;
+  }
+  .photo-marquee-track {
+    animation: none;
+  }
 }
 .essay-action {
   display: flex;
@@ -142,7 +196,7 @@ body[data-page="home"] .masthead {
 
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
-    .photo-essay img {
+    .essay-climber img {
       animation: essay-arrive linear both;
       animation-timeline: view();
       animation-range: entry 0% entry 100%;
@@ -189,6 +243,17 @@ footer .project-cta {
   padding: 8px 16px;
   font-size: .75rem;
 }
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.footer-brand canvas {
+  display: block;
+  width: 68px;
+  height: 42px;
+  object-fit: contain;
+}
 .project-cta span {
   mix-blend-mode: difference;
 }
@@ -222,29 +287,6 @@ footer .project-cta {
     position: relative;
   }
 }
-.opening-projects img {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: auto;
-}
-body[data-page="home"] .section {
-  max-width: 1160px;
-  margin-inline: auto;
-}
-.opening-projects {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
-  align-items: end;
-  gap: clamp(22px, 6vw, 92px);
-}
-.opening-projects .meta {
-  font: inherit;
-  font-size: .875rem;
-  color: var(--ink);
-  letter-spacing: normal;
-  text-transform: none;
-}
-
 @media (max-width: 640px) {
   body[data-page="home"] > .wrap {
     --page-gutter: 16px;
@@ -261,24 +303,15 @@ body[data-page="home"] .section {
   .photo-essay {
     --essay-spacing: 64px;
   }
-  .essay-opening,
-  .essay-pair,
-  .opening-projects {
+  .essay-opening {
     grid-template-columns: minmax(0, 1fr);
   }
   .essay-opening {
     gap: 36px;
   }
-  .essay-climber,
-  .essay-pair figure:last-child {
+  .essay-climber {
     width: min(78%, 360px);
     justify-self: end;
-  }
-  .essay-pair figure:last-child {
-    margin-top: 12px;
-  }
-  .opening-projects .card:first-child {
-    max-width: 22rem;
   }
 }
 
