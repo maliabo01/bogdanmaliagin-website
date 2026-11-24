@@ -1,12 +1,25 @@
+const ktmPhotoTitles = {
+  'ktm-DSC03946': 'KTM rider descending a trail through the woods',
+  'ktm-DSC03947': 'KTM rider kicking up dirt on a forest trail',
+  'ktm-DSC04086': 'KTM rider in tall grass at the edge of the woods',
+  'ktm-DSC04123': 'KTM rider rounding a bend between pine trees',
+  'ktm-DSC04224': 'KTM rider stopped on a sunlit woodland trail',
+  'ktm-DSC04250': 'KTM rider approaching through tall grass',
+  'ktm-DSC04254': 'Head-on view of the KTM rider framed by a dark foreground',
+  'ktm-DSC04300': 'KTM rider passing a barn on a rural road',
+  'ktm-DSC04396': 'Panning photograph of the KTM rider among birch trees'
+};
 const projects=[
  {slug:'high-ground',title:'High Ground',kind:'Mountains & people',cover:'hero',photos:['hero','climb','peaks','twilight','rainbow','people']},
  {slug:'dirt-roads',title:'Dirt Roads',kind:'Riders & overland',cover:'ride',photos:['ride','road','tracks','motorcycle']},
- {slug:'by-the-water',title:'By the Water',kind:'Coasts & travel',cover:'coastal',photos:['coastal','bridge','sail','harbor','skyline']}
+ {slug:'by-the-water',title:'By the Water',kind:'Coasts & travel',cover:'coastal',photos:['coastal','bridge','sail','harbor','skyline']},
+ {slug:'ktm-shoot',title:'KTM shoot',kind:'Motorcycle photography',cover:'ktm-DSC04224',photos:Object.keys(ktmPhotoTitles),showOnHome:false}
 ];
 const titles={hero:'A lone figure above the turquoise fjord',climb:'A climber on a rock face',peaks:'Star-filled sky above the peaks',twilight:'Mountain ridgeline at twilight',rainbow:'A rainbow above the mountains',people:'A bride on a rocky overlook',ride:'Off-road rider in the woods',road:'A 4×4 below a sunset sky',tracks:'A dusty trail behind a 4×4',motorcycle:'Motorcyclist at dusk',coastal:'Ferry passengers silhouetted in golden light',bridge:'A bridge along the coast',sail:'A sailboat seen from above',harbor:'Harbor-side buildings',skyline:'A figure looking across the city skyline'};
 const page=document.body.dataset.page;
 const main=document.querySelector('main');
-const pic=(name,lazy=true)=>`<img src="photos/${name}.jpg" alt="${titles[name]}" ${lazy?'loading="lazy"':''}>`;
+Object.assign(titles, ktmPhotoTitles);
+const pic=(name,lazy=true)=>`<img src="photos/${name}${Object.hasOwn(ktmPhotoTitles, name) ? '-preview' : ''}.jpg" alt="${titles[name]}" ${lazy?'loading="lazy"':''}>`;
 const cards=()=>`<div class="grid">${projects.map(p=>`<a class="card" href="projects.html?collection=${p.slug}">${pic(p.cover)}<h3>${p.title}</h3><span class="meta">${p.kind}</span></a>`).join('')}</div>`;
 const nav=document.querySelector('nav');
 nav.querySelector('[data-nav="'+page+'"]')?.setAttribute('aria-current','page');
@@ -78,7 +91,7 @@ if (page === 'home') {
       <section class="section">
         <h2>More projects</h2>
         <div class="grid opening-projects">
-          ${projects.slice(1).map(project => `
+          ${projects.slice(1).filter(project => project.showOnHome !== false).map(project => `
             <a class="card" href="projects.html?collection=${project.slug}">
               ${pic(project.cover)}
               <h3>${project.title}</h3>
