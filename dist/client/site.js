@@ -22,7 +22,8 @@ if (page === 'home') {
     <section class="hero" aria-labelledby="home-title">
       <figure class="opening-photo">
         <img src="photos/mountain-1440.jpg"
-             srcset="photos/mountain-768.jpg 768w, photos/mountain-1440.jpg 1440w, photos/mountain-2400.jpg 2400w"
+             srcset="photos/mountain-768.jpg 768w, photos/mountain-1440.jpg 1440w,
+                     photos/mountain-2400.jpg 2400w, photos/mountain-3200.jpg 3200w"
              sizes="max(100vw, 178dvh)"
              width="2400" height="1350" fetchpriority="high"
              alt="A rugged mountain ridge beneath a sky full of stars">
@@ -37,23 +38,36 @@ if (page === 'home') {
           </div>
           <figure class="essay-climber">
             <a href="${projectUrl}">
-              <img src="photos/climber-feature.jpg" width="900" height="1599" loading="lazy"
+              <img src="photos/climber-feature.jpg"
+                   srcset="photos/climber-feature.jpg 900w, photos/climber-feature-1440.jpg 1440w"
+                   sizes="(max-width: 640px) min(78vw, 360px), 420px"
+                   width="900" height="1599" loading="lazy"
                    alt="A climber in a blue jacket on a rock face against snowy peaks">
               <span>Jegihorn, 2024</span>
             </a>
           </figure>
         </div>
         <figure class="essay-coast">
-          <img src="photos/carousel-greece.jpg" width="960" height="540" loading="lazy"
+          <img src="photos/carousel-greece.jpg"
+               srcset="photos/carousel-greece.jpg 960w, photos/carousel-greece-1800.jpg 1800w,
+                       photos/carousel-greece-2880.jpg 2880w"
+               sizes="(max-width: 640px) calc(100vw - 32px), min(91vw, 1440px)"
+               width="960" height="540" loading="lazy"
                alt="A road above the Greek coastline at sunset">
         </figure>
         <div class="essay-pair">
           <figure>
-            <img src="photos/carousel-ktm.jpg" width="960" height="540" loading="lazy"
+            <img src="photos/carousel-ktm.jpg"
+                 srcset="photos/carousel-ktm.jpg 960w, photos/carousel-ktm-1920.jpg 1920w"
+                 sizes="(max-width: 640px) calc(100vw - 32px), min(52vw, 640px)"
+                 width="960" height="540" loading="lazy"
                  alt="A motorcycle rider on a wooded trail">
           </figure>
           <figure>
-            <img src="photos/carousel-model.jpg" width="540" height="960" loading="lazy"
+            <img src="photos/carousel-model.jpg"
+                 srcset="photos/carousel-model.jpg 540w, photos/carousel-model-1080.jpg 1080w"
+                 sizes="(max-width: 640px) min(78vw, 360px), min(29vw, 360px)"
+                 width="540" height="960" loading="lazy"
                  alt="A woman in a floral dress in a lane by the sea">
           </figure>
         </div>
