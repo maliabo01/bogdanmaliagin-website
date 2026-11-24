@@ -11,47 +11,82 @@ const cards=()=>`<div class="grid">${projects.map(p=>`<a class="card" href="proj
 const nav=document.querySelector('nav');
 nav.querySelector('[data-nav="'+page+'"]')?.setAttribute('aria-current','page');
 if (page === 'home') {
-  const featured = projects.map(project => `
-    <a class="card" href="projects.html?collection=${project.slug}">
-      ${pic(project.slug === 'high-ground' ? 'climb' : project.cover)}
-      <h3>${project.title}</h3>
-      <span class="meta">${project.kind}</span>
-    </a>
-  `).join('');
+  // Keep the two type treatments accessible through shareable preview URLs.
+  if (new URLSearchParams(location.search).get('intro-font') === 'sans') {
+    main.classList.add('intro-font-sans');
+  }
+  const featured = projects[0];
+  const projectUrl = `projects.html?collection=${featured.slug}`;
 
   main.innerHTML = `
     <section class="hero" aria-labelledby="home-title">
       <figure class="opening-photo">
-        <a href="projects.html?collection=high-ground">
-          <img src="photos/hero.jpg" width="1200" height="800" fetchpriority="high" alt="${titles.hero}">
-        </a>
-        <figcaption>High Ground</figcaption>
+        <img src="photos/mountain-1440.jpg"
+             srcset="photos/mountain-768.jpg 768w, photos/mountain-1440.jpg 1440w, photos/mountain-2400.jpg 2400w"
+             sizes="max(100vw, 178dvh)"
+             width="2400" height="1350" fetchpriority="high"
+             alt="A rugged mountain ridge beneath a sky full of stars">
       </figure>
-      <div class="opening-copy">
-        <h1 id="home-title">Adventure<br>photography</h1>
-        <div>
-          <p class="intro">People and landscapes, photographed in the field. Available throughout Finland and internationally.</p>
-          <a class="textbtn" href="projects.html">Explore projects</a>
+      <h1 id="home-title">Adventure photography</h1>
+    </section>
+    <div class="home-content">
+      <section id="photo-sequence" class="photo-essay" aria-label="Selected photographs">
+        <div class="essay-opening">
+          <div class="opening-copy">
+            <p class="intro">People and landscapes, photographed in the field. Available throughout Finland and internationally.</p>
+          </div>
+          <figure class="essay-climber">
+            <a href="${projectUrl}">
+              <img src="photos/climber-feature.jpg" width="900" height="1599" loading="lazy"
+                   alt="A climber in a blue jacket on a rock face against snowy peaks">
+              <span>Jegihorn, 2024</span>
+            </a>
+          </figure>
         </div>
-      </div>
-    </section>
-    <section class="section">
-      <h2>Selected projects</h2>
-      <div class="grid opening-projects">${featured}</div>
-    </section>
+        <figure class="essay-coast">
+          <img src="photos/carousel-greece.jpg" width="960" height="540" loading="lazy"
+               alt="A road above the Greek coastline at sunset">
+        </figure>
+        <div class="essay-pair">
+          <figure>
+            <img src="photos/carousel-ktm.jpg" width="960" height="540" loading="lazy"
+                 alt="A motorcycle rider on a wooded trail">
+          </figure>
+          <figure>
+            <img src="photos/carousel-model.jpg" width="540" height="960" loading="lazy"
+                 alt="A woman in a floral dress in a lane by the sea">
+          </figure>
+        </div>
+        <div class="essay-action">
+          <a class="project-cta" href="projects.html"><span>Explore projects</span></a>
+        </div>
+      </section>
+      <section class="section">
+        <h2>More projects</h2>
+        <div class="grid opening-projects">
+          ${projects.slice(1).map(project => `
+            <a class="card" href="projects.html?collection=${project.slug}">
+              ${pic(project.cover)}
+              <h3>${project.title}</h3>
+              <span class="meta">${project.kind}</span>
+            </a>
+          `).join('')}
+        </div>
+      </section>
+    </div>
   `;
 }
 const project=projects.find(p=>p.slug===new URLSearchParams(location.search).get('collection'));
 if(page==='projects' && project){document.title=project.title+' | Bogdan Maliagin';main.innerHTML=`<div class="head"><a class="textbtn" href="projects.html">All projects</a><h1>${project.title}</h1><p class="intro">${project.kind}</p></div><section class="section gallery">${project.photos.map(n=>`<button data-photo="${n}" title="Enlarge photograph">${pic(n)}</button>`).join('')}</section>`;}
 else if(page==='projects')main.innerHTML=`<div class="head"><div class="label">Bogdan Maliagin</div><h1>Projects</h1></div><section class="section">${cards()}</section>`;
-if(page==='pricing') main.innerHTML=`<div class="head"><div class="label">Working together</div><h1>Pricing</h1><p class="intro">Tell me where the shoot will take place, what you have in mind, and how you plan to use the photographs so I can quote for your project.</p></div>${[['Personal sessions','Outdoor portraits for individuals, couples, and riders.'],['Outdoor & travel stories','Location photography for destinations, guides, and tourism operators.'],['Brand assignments','Campaign photography for outdoor, adventure, and motorsport brands.']].map(([title,desc])=>`<div class="price"><div><h2>${title}</h2><p>${desc}</p></div><button class="textbtn" data-inquire="${title}">Request a quote</button></div>`).join('')}`;
+if(page==='pricing') main.innerHTML=`<div class="head"><div class="label">Working together</div><h1>Pricing</h1><p class="intro">Tell me where the shoot will take place, what you have in mind, and how you plan to use the photographs so I can quote for your project.</p></div>${[['Personal sessions','Outdoor portraits for individuals, couples, and riders.'],['Outdoor & travel stories','Location photography for destinations, guides, and tourism operators.'],['Brand assignments','Campaign photography for outdoor, adventure, and motorsport brands.']].map(([title,desc])=>`<div class="price"><div><h2>${title}</h2><p>${desc}</p></div><button type="button" class="project-cta" data-inquire="${title}"><span>Request a quote</span></button></div>`).join('')}`;
 // The local preview stores test inquiries on this Mac. Hosted sites use the portfolio form.
 if (!['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
   for (const button of document.querySelectorAll('button[data-inquire]')) {
     const link = document.createElement('a');
     link.href = 'https://portfolio.bogdanmaliagin.com/contact';
     link.className = button.className;
-    link.textContent = button.textContent;
+    link.append(...button.childNodes);
     button.replaceWith(link);
   }
 }
