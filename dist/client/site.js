@@ -109,8 +109,8 @@ e3a7b21f-b72c-4e5f-b4c0-75e637457993 b0f19c911fb8fee3d5df68e85b5a55c5 1779
         const [id, hash, ratio] = photo.split(' ');
         const width = Number(ratio) >= 1400 ? 1200 : 600;
         const source = `${portfolioCdn}/${id}_rw_${width}.jpg?h=${hash}`;
-        return `<li class="photo-frame"><img src="${source}" alt="Portfolio photograph"
-          style="aspect-ratio:${ratio}/1000" loading="lazy" decoding="async"></li>`;
+        return `<li class="photo-frame"><img data-src="${source}" alt="Portfolio photograph"
+          style="aspect-ratio:${ratio}/1000" decoding="async"></li>`;
       }).join('');
       return `<div class="photo-marquee-row" role="group" aria-label="Photo row ${index + 1}"><div class="photo-marquee-track">
         <ul class="photo-marquee-strip" role="list">${frames}</ul>
@@ -118,6 +118,32 @@ e3a7b21f-b72c-4e5f-b4c0-75e637457993 b0f19c911fb8fee3d5df68e85b5a55c5 1779
       </div></div>`;
     }).join('')}
   </div>`;
+}
+
+function loadPhotoRow(row) {
+  const track = row.querySelector('.photo-marquee-track');
+  const [original, copy] = track.children;
+  const copies = [...copy.querySelectorAll('img')];
+  const rowBounds = row.getBoundingClientRect();
+
+  original.querySelectorAll('img').forEach(async (image, index) => {
+    const pair = [image, copies[index]];
+    const nearViewport = pair.some(photo => {
+      const bounds = photo.getBoundingClientRect();
+      return bounds.right > rowBounds.left && bounds.left < rowBounds.right;
+    });
+
+    try {
+      await Promise.all(pair.map(async photo => {
+        photo.fetchPriority = nearViewport ? 'auto' : 'low';
+        photo.src = photo.dataset.src;
+        await photo.decode();
+      }));
+      pair.forEach(photo => photo.parentElement.setAttribute('data-loaded', ''));
+    } catch {
+      pair.forEach(photo => photo.parentElement.remove());
+    }
+  });
 }
 
 const nav=document.querySelector('nav');
@@ -163,18 +189,27 @@ if (page === 'home') {
   `;
 
   const marquee = main.querySelector('.photo-marquee');
+  const marqueeRows = marquee.querySelectorAll('.photo-marquee-row');
+  const loadPhotos = () => marqueeRows.forEach(loadPhotoRow);
 
   if ('IntersectionObserver' in window) {
+    const preloadObserver = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      preloadObserver.disconnect();
+      loadPhotos();
+    }, { rootMargin: '800px 0px' });
+    preloadObserver.observe(marquee);
+
     marquee.setAttribute('data-offscreen', '');
     const observer = new IntersectionObserver(([entry]) => {
       marquee.toggleAttribute('data-offscreen', !entry.isIntersecting);
     });
     observer.observe(marquee);
-  }
+  } else loadPhotos();
 
   const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
   const updateScrollFocus = () => {
-    marquee.querySelectorAll('.photo-marquee-row').forEach(row => {
+    marqueeRows.forEach(row => {
       if (motionPreference.matches) row.setAttribute('tabindex', '0');
       else row.removeAttribute('tabindex');
     });

@@ -163,6 +163,9 @@ body[data-page="home"] .masthead {
   padding: var(--frame-mat);
   background: #fff;
 }
+.photo-frame:not([data-loaded]) {
+  visibility: hidden;
+}
 .photo-frame img {
   display: block;
   width: auto;
