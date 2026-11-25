@@ -222,19 +222,32 @@ const project=projects.find(p=>p.slug===new URLSearchParams(location.search).get
 if(page==='projects' && project){document.title=project.title+' | Bogdan Maliagin';main.innerHTML=`<div class="head"><a class="textbtn" href="projects.html">All projects</a><h1>${project.title}</h1><p class="intro">${project.kind}</p></div><section class="section gallery">${project.photos.map(n=>`<button data-photo="${n}" title="Enlarge photograph">${pic(n)}</button>`).join('')}</section>`;}
 else if(page==='projects')main.innerHTML=`<div class="head"><div class="label">Bogdan Maliagin</div><h1>Projects</h1></div><section class="section">${cards()}</section>`;
 if(page==='pricing') main.innerHTML=`<div class="head"><div class="label">Working together</div><h1>Pricing</h1><p class="intro">Tell me where the shoot will take place, what you have in mind, and how you plan to use the photographs so I can quote for your project.</p></div>${[['Personal sessions','Outdoor portraits for individuals, couples, and riders.'],['Outdoor & travel stories','Location photography for destinations, guides, and tourism operators.'],['Brand assignments','Campaign photography for outdoor, adventure, and motorsport brands.']].map(([title,desc])=>`<div class="price"><div><h2>${title}</h2><p>${desc}</p></div><button type="button" class="project-cta" data-inquire="${title}"><span>Request a quote</span></button></div>`).join('')}`;
-// The local preview stores test inquiries on this Mac. Hosted sites use the portfolio form.
-if (!['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) {
-  for (const button of document.querySelectorAll('button[data-inquire]')) {
-    const link = document.createElement('a');
-    link.href = 'https://portfolio.bogdanmaliagin.com/contact';
-    link.className = button.className;
-    link.append(...button.childNodes);
-    button.replaceWith(link);
-  }
-}
+const isLocalPreview = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const dialog=document.querySelector('#inquiry'), viewer=document.querySelector('#viewer'), form=dialog.querySelector('form');
+dialog.querySelector('.note').hidden = !isLocalPreview;
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.hasAttribute('data-inquire')){form.elements.type.value=b.dataset.inquire||'';form.querySelector('output').textContent='';dialog.showModal()}if(b.dataset.photo){const i=viewer.querySelector('img');i.src='photos/'+b.dataset.photo+'.jpg';i.alt=ktmPhotoTitles[b.dataset.photo];viewer.showModal()}if(b.classList.contains('close'))b.closest('dialog').close()});
-form.addEventListener('submit',async e=>{e.preventDefault();const submit=form.querySelector('[type=submit]'),out=form.querySelector('output');submit.disabled=true;try{const r=await fetch('/inquiries',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(form)))});if(!r.ok)throw Error();form.reset();out.textContent='Inquiry saved on this Mac.'}catch{out.textContent='Your inquiry could not be saved. Please try again.'}finally{submit.disabled=false}});
+form.addEventListener('submit', async event => {
+  event.preventDefault();
+  const submit = form.querySelector('[type=submit]');
+  const status = form.querySelector('output');
+  submit.disabled = true;
+  status.textContent = 'Sending…';
+
+  try {
+    const response = await fetch(isLocalPreview ? '/inquiries' : '/api/inquiries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.fromEntries(new FormData(form))),
+    });
+    if (!response.ok) throw Error();
+    form.reset();
+    status.textContent = isLocalPreview ? 'Inquiry saved on this Mac.' : 'Thanks. Your inquiry was sent.';
+  } catch {
+    status.textContent = 'Your inquiry could not be sent. Please try again.';
+  } finally {
+    submit.disabled = false;
+  }
+});
 const logo = document.querySelector('.brand img');
 
 function paintLogo() {
