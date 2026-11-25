@@ -183,6 +183,7 @@ if (page === 'home') {
         ${photoMarquee()}
         <div class="essay-action">
           <a class="project-cta" href="projects.html"><span>Explore projects</span></a>
+          <button type="button" class="project-cta" data-inquire><span>Inquire about a shoot</span></button>
         </div>
       </section>
     </div>

@@ -193,7 +193,9 @@ body[data-page="home"] .masthead {
 }
 .essay-action {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 12px;
   padding-block: clamp(56px, 9vw, 130px);
 }
 
@@ -256,6 +258,22 @@ footer .project-cta {
   width: 68px;
   height: 42px;
   object-fit: contain;
+}
+.footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+.footer-instagram {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+.footer-instagram:hover {
+  opacity: .75;
 }
 .project-cta span {
   mix-blend-mode: difference;
