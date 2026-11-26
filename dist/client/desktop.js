@@ -163,7 +163,11 @@ if (page === 'home') {
              width="2400" height="1350" fetchpriority="high"
              alt="A rugged mountain ridge beneath a sky full of stars">
       </figure>
-      <h1 id="home-title">Adventure photography</h1>
+      <div class="hero-copy">
+        <h1 id="home-title">Adventure photography</h1>
+        <p class="hero-summary">Outdoor portraits, travel stories<br>and photography for adventure brands.</p>
+        <a class="hero-projects" href="projects.html">Explore the photographs</a>
+      </div>
     </section>
     <div class="home-content">
       <section id="photo-sequence" class="photo-essay" aria-label="Selected photographs">
