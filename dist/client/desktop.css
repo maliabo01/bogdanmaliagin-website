@@ -87,20 +87,11 @@ body[data-page="home"] .masthead {
 }
 .hero-copy {
   display: grid;
-  justify-items: start;
   gap: 12px;
 }
 .hero-summary {
   font-size: clamp(15px, 1.3vw, 18px);
   line-height: 1.5;
-}
-.hero-projects {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 16px;
-  text-decoration: underline;
-  text-underline-offset: 6px;
 }
 .home-content {
   position: relative;

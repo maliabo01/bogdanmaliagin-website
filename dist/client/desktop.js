@@ -166,7 +166,6 @@ if (page === 'home') {
       <div class="hero-copy">
         <h1 id="home-title">Adventure photography</h1>
         <p class="hero-summary">Outdoor portraits, travel stories<br>and photography for adventure brands.</p>
-        <a class="hero-projects" href="projects.html">Explore the photographs</a>
       </div>
     </section>
     <div class="home-content">
