@@ -6,7 +6,7 @@ import {randomUUID} from 'node:crypto';
 
 const project=path.dirname(fileURLToPath(import.meta.url));
 const root=path.join(project,'dist/client');
-const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.png':'image/png','.jpg':'image/jpeg'};
+const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.png':'image/png','.jpg':'image/jpeg','.webp':'image/webp'};
 
 export const server=http.createServer(async (req,res)=>{
   const reply=(status,body='')=>{res.writeHead(status);res.end(body)};
