@@ -10,7 +10,8 @@ const ktmPhotoTitles = {
   'ktm-DSC04396': 'Panning photograph of the KTM rider among birch trees'
 };
 const selectedPhotographs = [
-  {id:'rainbow',width:1200,height:800,alt:'A rainbow crossing sunlit mountain slopes beneath dark clouds'},
+  {id:'porsche-purple',width:600,height:1066,alt:'Front view of a purple Porsche',portfolioAsset:'fc4bf1db-5d14-41f7-a825-36a3829bb9b8_rw_600.jpg?h=a82282dd1fc1b935cb96ce37437c7688'},
+  {id:'porsche-under-bridge',width:600,height:900,alt:'A Porsche parked on a city street beneath a bridge',portfolioAsset:'18de602c-d5d1-40f8-9ef6-2bffcedc44ee_rw_600.jpg?h=6c33ed56e5ea10479f38c8f1c63de4b5'},
   {id:'people',width:600,height:900,alt:'A couple in wedding clothes on a broad rock ledge above a mountain fjord'},
   {id:'harbor',width:1200,height:799,alt:'An aerial view of a red waterside cabin and a road along a clear turquoise inlet'},
   {id:'climb',width:600,height:1066,alt:'A climber in a blue jacket holding onto a rock face above snowy mountains'},
@@ -25,11 +26,28 @@ const selectedPhotographs = [
 ];
 const portraitPhotos = new Set(['ktm-DSC04086', 'ktm-DSC04250', 'ktm-DSC04254']);
 const photoLibrary = Object.fromEntries(selectedPhotographs.map(photo => [photo.id, photo]));
+photoLibrary.rainbow = {id:'rainbow',width:1200,height:800,alt:'A rainbow crossing sunlit mountain slopes beneath dark clouds'};
 for (const [id, alt] of Object.entries(ktmPhotoTitles)) {
   photoLibrary[id] = {id, alt, width:640, height:portraitPhotos.has(id) ? 1138 : 360, widths:[640,1280,1920]};
 }
+const ktmProject = {
+  slug: 'ktm-shoot',
+  title: 'KTM shoot',
+  kind: 'Motorcycle photography',
+  cover: 'ktm-DSC04224',
+  frames: [
+    {layout: 'wide', photos: ['ktm-DSC04224']},
+    {layout: 'pair', photos: ['ktm-DSC03946', 'ktm-DSC03947']},
+    {layout: 'portrait-first', photos: ['ktm-DSC04086', 'ktm-DSC04123']},
+    {layout: 'solo', photos: ['ktm-DSC04254']},
+    {layout: 'portrait-last', photos: ['ktm-DSC04300', 'ktm-DSC04250']},
+    {layout: 'wide', photos: ['ktm-DSC04396']}
+  ]
+};
+ktmProject.photos = ktmProject.frames.flatMap(frame => frame.photos);
+
 const projects = [
-  {slug:'ktm-shoot',title:'Riding the forest trails',kind:'Motorcycle photography',cover:'ktm-DSC04224',photos:Object.keys(ktmPhotoTitles),description:'A rider, forest trails and the roads between them. Action frames sit alongside quieter moments, with the woodland landscape running through the series.'},
+  ktmProject,
   {slug:'travel-landscapes',title:'From the coast to the mountains',kind:'Travel & landscapes',cover:'bridge',photos:['rainbow','harbor','sail','bridge','twilight','coastal','climb'],description:'Open water, mountain weather and places seen from above. A selection of photographs following the changing light and scale of the outdoors.'},
   {slug:'people-places',title:'People & places',kind:'Portraits',cover:'carousel-model',photos:['carousel-model','couple','motorcycle','people'],description:'A quiet street, a room by a window, a pause on the journey. Portraits and small moments that keep people connected to their surroundings.'}
 ];
@@ -40,35 +58,18 @@ const services = [
 ];
 const page = document.body.dataset.page;
 const main = document.querySelector('main');
-const photoWidths = photo => photo.widths || [...new Set([Math.min(480,photo.width),Math.min(960,photo.width),photo.width])];
-const photoSources = name => photoWidths(photoLibrary[name]).map(width => `photos/${name}-${width}.webp ${width}w`).join(', ');
-const pic = (name, sizes='(max-width: 640px) calc(100vw - 44px), (max-width: 1000px) 45vw, 700px') => {
+const photoWidths = photo => (photo.portfolioAsset ? [photo.width] : photo.widths) || [...new Set([Math.min(480,photo.width),Math.min(960,photo.width),photo.width])];
+const portfolioCdn = 'https://cdn.myportfolio.com/275451db-8226-4a72-a144-2fb75a46ba93';
+const photoSource = (photo, width = photoWidths(photo)[0]) => photo.portfolioAsset
+  ? `${portfolioCdn}/${photo.portfolioAsset}`
+  : `photos/${photo.id}-${width}.webp`;
+const photoSources = photo => photoWidths(photo)
+  .map(width => `${photoSource(photo,width)} ${width}w`).join(', ');
+const pic = (name, sizes = 'calc(100vw - 40px)', eager = false) => {
   const photo=photoLibrary[name];
-  return `<img src="photos/${name}-${photoWidths(photo)[0]}.webp" srcset="${photoSources(name)}"
-    sizes="${sizes}" width="${photo.width}" height="${photo.height}" alt="${photo.alt}" loading="lazy" decoding="async">`;
+  return `<img src="${photoSource(photo)}" srcset="${photoSources(photo)}"
+    sizes="${sizes}" width="${photo.width}" height="${photo.height}" alt="${photo.alt}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 };
-const cards = () => `<div class="grid">${projects.map(project => `
-  <a class="card" href="projects.html?collection=${project.slug}">
-    ${pic(project.cover)}
-    <h2>${project.title}</h2>
-    <p class="project-kind">${project.kind} · ${project.photos.length} photographs</p>
-  </a>
-`).join('')}</div>`;
-const process = () => `<section class="booking-process" aria-labelledby="booking-title">
-  <h2 id="booking-title">From an idea to a shoot.</h2>
-  <ol>
-    <li><h3>Share your idea</h3><p>Tell me what you have in mind, your preferred location and dates, and how you plan to use the photographs.</p></li>
-    <li><h3>Agree on the details</h3><p>We’ll discuss the scope and quote, including the shoot, image delivery and usage, before making plans.</p></li>
-    <li><h3>Make the photographs</h3><p>With the brief in place, we can focus on the people, the setting and the moments worth photographing.</p></li>
-  </ol>
-</section>`;
-const inquirySection = () => `<section class="inquiry-section" aria-labelledby="inquiry-heading">
-  <div><h2 id="inquiry-heading">Let’s plan your next shoot.</h2><p>Tell me about the person, place or story you have in mind.</p></div>
-  <div class="inquiry-actions"><button type="button" class="project-cta" data-inquire><span>Plan a shoot</span></button>
-  <a class="text-link" href="https://wa.me/358440325505" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
-  <a class="email-link" href="mailto:bogdan.maliagin@gmail.com">bogdan.maliagin@gmail.com</a></div>
-</section>`;
-
 const nav=document.querySelector('nav');
 nav.querySelector('[data-nav="'+page+'"]')?.setAttribute('aria-current','page');
 const masthead = document.querySelector('.masthead');
@@ -83,7 +84,7 @@ menuDrawer.innerHTML = `<div class="drawer-header"><span>Bogdan Maliagin</span>
 const drawerNav = nav.cloneNode(true);
 drawerNav.removeAttribute('id');
 menuDrawer.append(drawerNav);
-menuDrawer.insertAdjacentHTML('beforeend', '<button type="button" class="btn drawer-contact" data-inquire>Plan a shoot</button><a class="text-link drawer-whatsapp" href="https://wa.me/358440325505" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>');
+menuDrawer.insertAdjacentHTML('beforeend', '<button type="button" class="btn drawer-contact" data-inquire>Contact</button><a class="text-link drawer-whatsapp" href="https://wa.me/358440325505" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>');
 document.body.append(menuDrawer);
 function syncMenuState() {
   masthead.toggleAttribute('data-menu-open', menuDrawer.open);
@@ -137,6 +138,18 @@ matchMedia('(max-width: 640px)').addEventListener('change', () => menuDrawer.clo
 matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', event => {
   if (event.matches && menuDrawer.classList.contains('is-closing')) menuDrawer.close();
 });
+const essayPhotographs = [
+  {asset:'6fdab0d7-c331-4b70-b5ea-ec45875282c0_rw_1200.jpg?h=e4630edf175593d15c81da164af9b9e8', ratio:1778, alt:'A motorcyclist among the trees'},
+  {asset:'6fdb4aaf-ee8e-49a2-a3db-ce0da0a76db6_rw_1200.jpg?h=a2ed47da2c39678142fbeffc4e71dc2a', ratio:1778, alt:'A coastal rock formation in evening light'},
+  {asset:'dea3028e-69c7-4a9e-a149-a9252c0bd053_rw_600.jpg?h=eb8a8a346e9f32d5e7f2b4fcc2157570', ratio:563, alt:'A drink being prepared at a bar'},
+  {asset:'01c3da5e-5a51-44fb-a488-57a3f8252f34_rw_1200.jpg?h=027ced196ff586944157b988e818765f', ratio:1779, alt:'A flag silhouetted against an orange sunset'},
+  {asset:'e1b60733-f32b-4860-858b-169e077065af_rw_1200.jpg?h=883988b4fa82ca94260ecccab300aa80', ratio:1778, alt:'A rocky mountain valley beneath a twilight sky'},
+  {asset:'74213495-e5b5-4044-aaa3-e0864b49d6d0_rw_600.jpg?h=387b04257f784efc8a2899d750403e05', ratio:800, alt:'A rocky coastline seen from above at sunset'},
+  {asset:'bca2cdb8-23bd-4cbc-bb2d-6f0d9c1ad493_rw_600.jpg?h=228b487d71ebe36a9925f32f5b5f7426', ratio:1000, alt:'Sunlight falling through a dense forest'},
+  {asset:'2d1706f8-4a05-4210-bda2-83fc2b8eb67f_rw_1200.jpg?h=ed80a5b587a129bcb88e3f04154483e4', ratio:1501, alt:'A sheep standing on a rocky hillside'},
+  {asset:'e8e70973-c27d-4243-9965-e5c1f3d08ce7_rw_1200.jpg?h=35149be9e25539ce61693253daed9b70', ratio:1778, alt:'The Milky Way framed by trees'}
+];
+
 if (page === 'home') {
   main.innerHTML = `
     <section class="hero" aria-labelledby="home-title">
@@ -147,39 +160,135 @@ if (page === 'home') {
              alt="A rugged mountain ridge beneath a sky full of stars">
       </figure>
       <div class="hero-copy">
-        <h1 id="home-title"><span>Adventure</span> <span>photography</span></h1>
+        <h1 id="home-title">Adventure photography</h1>
         <p class="hero-summary">Outdoor portraits, travel stories<br>and photography for adventure brands.</p>
-        <a class="hero-projects" href="#selected-work">Explore the photographs</a>
       </div>
     </section>
     <div class="home-content">
+      <section id="photo-sequence" class="photo-essay" aria-labelledby="photo-sequence-title">
+        <div class="essay-opening">
+          <div class="opening-copy">
+            <h2 id="photo-sequence-title" class="visually-hidden">Selected photographs</h2>
+            <p>People and landscapes, photographed in the field. Available throughout Finland and internationally.</p>
+          </div>
+          <figure class="essay-climber">
+            <img src="photos/climber-feature-640.webp"
+                 srcset="photos/climber-feature-640.webp 640w, photos/climber-feature-1280.webp 1280w"
+                 sizes="min(72vw, 420px)" width="900" height="1599" loading="lazy" decoding="async"
+                 alt="A climber in a blue jacket on a rock face against snowy peaks">
+            <figcaption>Jegihorn, 2024</figcaption>
+          </figure>
+        </div>
+        <ul class="essay-strip" aria-label="Portfolio photographs" tabindex="0">
+          ${essayPhotographs.map(({asset, ratio, alt}) => `
+            <li style="--photo-ratio: ${ratio / 1000}">
+              <img src="${portfolioCdn}/${asset}" alt="${alt}" loading="lazy" decoding="async">
+            </li>`).join('')}
+        </ul>
+        <div class="essay-action">
+          <a class="project-cta" href="projects.html"><span>Explore projects</span></a>
+          <button type="button" class="project-cta" data-inquire><span>Inquire about a shoot</span></button>
+        </div>
+      </section>
       <section id="selected-work" class="selected-work" aria-labelledby="selected-title">
         <div class="section-heading"><h2 id="selected-title">A sense of being there.</h2><p>People, landscapes and life outdoors.<br>A selection of photographs by Bogdan Maliagin.</p></div>
         <div class="selected-grid">${selectedPhotographs.map(photo => `<figure><button type="button" data-photo="${photo.id}" data-selection="home" aria-label="Enlarge: ${photo.alt}">${pic(photo.id,'(max-width: 640px) calc((100vw - 44px) / 2), (max-width: 1000px) 44vw, 29vw')}</button></figure>`).join('')}</div>
         <a class="text-link" href="projects.html">Explore the collections</a>
       </section>
-      <section id="about" class="about-section" aria-labelledby="about-title">
-        <figure><img src="photos/hero-480.webp" srcset="photos/hero-480.webp 480w, photos/hero-960.webp 960w, photos/hero-1200.webp 1200w" sizes="(max-width: 640px) 92vw, 45vw" width="1200" height="800" loading="lazy" decoding="async" alt="A hiker looking out over a blue fjord from a rocky mountain ledge"></figure>
-        <div><h2 id="about-title">I’m Bogdan.</h2><p class="about-lead">I photograph people, landscapes and life outdoors.</p><p>My work moves between mountain paths, coastlines and forest trails, with an eye for the people and small moments along the way.</p><a class="text-link" href="https://www.instagram.com/bogdanmaliagin/">More photographs on Instagram</a></div>
-      </section>
       <section class="home-services" aria-labelledby="services-title">
-        <div class="section-heading"><h2 id="services-title">Make something<br>out there.</h2><p>Portraits, travel stories and brand assignments.<br>Start with an idea; we’ll work through the details.</p></div>
-        <div class="service-summary">${services.map(service=>`<a href="pricing.html"><h3>${service.title}</h3><p>${service.description}</p><span class="text-link">About the shoot</span></a>`).join('')}</div>
+        <div class="home-services-intro">
+          <h2 id="services-title">Make something<br>out there.</h2>
+          <p>Portraits, travel stories and brand assignments. Start with an idea; we’ll work through the details.</p>
+        </div>
+        <div>
+          <div class="service-summary">
+            ${services.map(service => `<article><h3>${service.title}</h3><p>${service.description}</p></article>`).join('')}
+          </div>
+          <div class="home-services-action">
+            <button type="button" class="project-cta" data-inquire><span>Plan the shoot</span></button>
+          </div>
+        </div>
       </section>
-      ${inquirySection()}
     </div>`;
 }
-const project=projects.find(p=>p.slug===new URLSearchParams(location.search).get('collection'));
-if(page==='projects' && project){
-  document.title=project.title+' | Bogdan Maliagin';
-  main.innerHTML=`<div class="head project-head"><a class="text-link" href="projects.html">All collections</a><h1>${project.title}</h1><p class="project-kind">${project.kind} · ${project.photos.length} photographs</p><p class="intro project-description">${project.description}</p></div><section class="section gallery" aria-label="${project.kind}">${project.photos.map(n=>`<button type="button" data-photo="${n}" aria-label="Enlarge: ${photoLibrary[n].alt}">${pic(n)}</button>`).join('')}</section><nav class="collection-nav" aria-label="More collections">${projects.filter(other=>other!==project).map(other=>`<a class="text-link" href="projects.html?collection=${other.slug}">${other.title}</a>`).join('')}</nav>${inquirySection()}`;
-}else if(page==='projects'){
-  main.innerHTML=`<div class="head"><h1>Photographic stories.</h1><p class="intro">Motorcycle trails, mountain light and people along the way. Explore the work, one collection at a time.</p></div><section class="section" aria-label="Photography collections">${cards()}</section>${inquirySection()}`;
+
+const project = projects.find(entry => entry.slug === new URLSearchParams(location.search).get('collection'));
+if (page === 'projects' && project) {
+  document.title = `${project.title} | Bogdan Maliagin`;
+  const frames = project.frames ?? project.photos.map(name => ({layout: 'wide', photos: [name]}));
+  main.innerHTML = `
+    <header class="projects-heading">
+      <a class="text-link" href="projects.html">All projects</a>
+      <h1>${project.title}</h1>
+      <p>${project.kind}</p>
+      ${project.description ? `<p class="project-description">${project.description}</p>` : ''}
+    </header>
+    <section class="project-sequence" aria-label="${project.title} photographs">
+      ${frames.map(({layout, photos}, index) => `
+        <div class="project-frames project-frames--${layout}">
+          ${photos.map(name => `
+            <button type="button" class="project-frame" data-photo="${name}"
+              aria-label="Enlarge photograph: ${photoLibrary[name].alt}">
+              ${pic(name, photos.length === 1 ? 'calc(100vw - 40px)' : '46vw', index === 0)}
+            </button>
+          `).join('')}
+        </div>
+      `).join('')}
+    </section>`;
+} else if (page === 'projects') {
+  main.innerHTML = `
+    <header class="projects-heading"><h1>Projects</h1></header>
+    <div class="project-features">
+      <article>
+        <a class="project-feature" href="projects.html?collection=${ktmProject.slug}" aria-label="View project: ${ktmProject.title}">
+          ${pic(ktmProject.cover, 'calc(100vw - 40px)', true)}
+          <div class="project-feature-caption">
+            <div><h2>${ktmProject.title}</h2><p>${ktmProject.kind}</p></div>
+            <span>View project</span>
+          </div>
+        </a>
+      </article>
+    </div>`;
 }
-if(page==='pricing') {
-  document.title='Services | Bogdan Maliagin';
-  main.innerHTML=`<div class="head"><h1>Let’s make<br>something together.</h1><p class="intro">Personal sessions, travel stories and brand photography. Each shoot is quoted around the location, the scope and how the photographs will be used.</p></div><section aria-label="Photography services">${services.map(service=>`<div class="price"><div><h2>${service.title}</h2><p>${service.description}</p></div><button type="button" class="project-cta" data-inquire="${service.title}"><span>Plan a shoot</span></button></div>`).join('')}</section>${process()}<section class="quote-details"><h2>What goes into a quote?</h2><p>The location and travel involved, time on the shoot, the photographs you need and their intended use. Include what you know in your inquiry—we can work through the rest together.</p><p>Delivery timing and usage are agreed for your project before the shoot.</p></section>${inquirySection()}`;
+
+if (page === 'pricing') {
+  main.innerHTML = `
+    <header class="services-heading">
+      <h1>Let’s make<br>something together.</h1>
+      <p class="intro">Personal sessions, travel stories and brand photography. Each shoot is quoted around the location, the scope and how the photographs will be used.</p>
+    </header>
+    <section class="services-list" aria-label="Photography services">
+      ${services.map(service => `
+        <article class="price">
+          <div><h2>${service.title}</h2><p>${service.description}</p></div>
+          <button type="button" class="project-cta" data-inquire="${service.title}"><span>Plan a shoot</span></button>
+        </article>
+      `).join('')}
+    </section>
+    <section class="services-section" aria-labelledby="booking-title">
+      <h2 id="booking-title">From an idea to a shoot.</h2>
+      <ol class="booking-steps">
+        <li><h3>Share your idea</h3><p>Tell me what you have in mind, your preferred location and dates, and how you plan to use the photographs.</p></li>
+        <li><h3>Agree on the details</h3><p>We’ll discuss the scope and quote, including the shoot, image delivery and usage, before making plans.</p></li>
+        <li><h3>Make the photographs</h3><p>With the brief in place, we can focus on the people, the setting and the moments worth photographing.</p></li>
+      </ol>
+    </section>
+    <section class="services-section" aria-labelledby="quote-title">
+      <h2 id="quote-title">What goes into a quote?</h2>
+      <p>The location and travel involved, time on the shoot, the photographs you need and their intended use. Include what you know in your inquiry—we can work through the rest together.</p>
+      <p>Delivery timing and usage are agreed for your project before the shoot.</p>
+    </section>
+    <section class="services-section" aria-labelledby="inquiry-heading">
+      <h2 id="inquiry-heading">Let’s plan your next shoot.</h2>
+      <p>Tell me about the person, place or story you have in mind.</p>
+      <div class="services-actions">
+        <button type="button" class="project-cta" data-inquire><span>Plan a shoot</span></button>
+        <a class="text-link" href="https://wa.me/358440325505" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
+        <a class="text-link" href="mailto:bogdan.maliagin@gmail.com">bogdan.maliagin@gmail.com</a>
+      </div>
+    </section>`;
 }
+
 const isLocalPreview = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const dialog=document.querySelector('#inquiry'), viewer=document.querySelector('#viewer'), form=dialog.querySelector('form');
 dialog.querySelector('.note').hidden = !isLocalPreview;
@@ -194,8 +303,8 @@ function showPhoto(index) {
   const image = viewer.querySelector('img');
   image.alt = photo.alt;
   image.sizes = photo.height > photo.width ? `min(100vw, ${Math.round(100*photo.width/photo.height)}dvh)` : '100vw';
-  image.srcset = photoSources(name);
-  image.src = `photos/${name}-${photoWidths(photo)[0]}.webp`;
+  image.srcset = photoSources(photo);
+  image.src = photoSource(photo);
   viewer.querySelector('#photo-position').textContent = `${photoIndex + 1} of ${activePhotos.length}`;
   viewer.querySelector('.viewer-caption').textContent = photo.alt;
 }

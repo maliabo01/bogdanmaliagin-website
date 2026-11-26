@@ -13,6 +13,12 @@
     document.title = desktopLayout.dataset.title;
     document.body.replaceChildren(desktopLayout.content);
   } else {
+    const sharedLayout = desktopLayout.content;
+    const footer = sharedLayout.querySelector('footer');
+    const footerAction = footer.querySelector('.project-cta');
+    if (footerAction) footer.append(footerAction);
+    document.querySelector('footer').replaceWith(footer);
+    document.querySelector('#viewer').before(sharedLayout.querySelector('#inquiry'));
     desktopLayout.remove();
   }
 
