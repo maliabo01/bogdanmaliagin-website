@@ -10,18 +10,40 @@ const ktmPhotoTitles = {
   'ktm-DSC04396': 'Panning photograph of the KTM rider among birch trees'
 };
 const projects = [
-  {slug:'ktm-shoot',title:'KTM shoot',kind:'Motorcycle photography',cover:'ktm-DSC04224',photos:Object.keys(ktmPhotoTitles)}
+  {
+    slug: 'ktm-shoot',
+    title: 'KTM shoot',
+    kind: 'Motorcycle photography',
+    cover: 'ktm-DSC04224',
+    frames: [
+      { layout: 'wide', photos: ['ktm-DSC04224'] },
+      { layout: 'pair', photos: ['ktm-DSC03946', 'ktm-DSC03947'] },
+      { layout: 'portrait-first', photos: ['ktm-DSC04086', 'ktm-DSC04123'] },
+      { layout: 'solo', photos: ['ktm-DSC04254'] },
+      { layout: 'portrait-last', photos: ['ktm-DSC04300', 'ktm-DSC04250'] },
+      { layout: 'wide', photos: ['ktm-DSC04396'] }
+    ]
+  }
+];
+const ktmPortraits = new Set(['ktm-DSC04086', 'ktm-DSC04250', 'ktm-DSC04254']);
+const services = [
+  {title:'Personal sessions',description:'Outdoor portraits for individuals, couples and riders. Bring a person, a place or an idea you want to remember.'},
+  {title:'Outdoor & travel stories',description:'Location photography for destinations, guides and tourism operators. People, landscapes and the experience of being there.'},
+  {title:'Brand assignments',description:'Photography for outdoor, adventure and motorsport brands. Share the brief, the setting and where the images will appear.'}
 ];
 const page = document.body.dataset.page;
 const main = document.querySelector('main');
-const pic = name => `<img src="photos/${name}-preview.jpg" alt="${ktmPhotoTitles[name]}" loading="lazy">`;
-const cards = () => `<div class="grid">${projects.map(project => `
-  <a class="card" href="projects.html?collection=${project.slug}">
-    ${pic(project.cover)}
-    <h3>${project.title}</h3>
-    <span class="meta">${project.kind}</span>
-  </a>
-`).join('')}</div>`;
+function projectImage(name, { wide = false, eager = false } = {}) {
+  const portrait = ktmPortraits.has(name);
+  const sizes = wide ? '(min-width: 1640px) 1480px, 91vw' : portrait ? '(min-width: 1640px) 520px, 40vw' : '(min-width: 1640px) 850px, 55vw';
+  const srcset = [640, 1280, 1920].map(width => `photos/${name}-${width}.webp ${width}w`).join(', ');
+  return `<picture>
+    <source type="image/webp" srcset="${srcset}" sizes="${sizes}">
+    <img src="photos/${name}-preview.jpg" alt="${ktmPhotoTitles[name]}"
+      width="${portrait ? 810 : 1440}" height="${portrait ? 1440 : 810}"
+      ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">
+  </picture>`;
+}
 
 function photoMarquee() {
   // Adobe Portfolio's public grid supplies the asset IDs, variant hashes and proportions.
@@ -189,6 +211,20 @@ if (page === 'home') {
           <button type="button" class="project-cta" data-inquire><span>Inquire about a shoot</span></button>
         </div>
       </section>
+      <section class="home-services" aria-labelledby="services-title">
+        <div class="home-services-intro">
+          <h2 id="services-title">Make something<br>out there.</h2>
+          <p>Portraits, travel stories and brand assignments. Start with an idea; we’ll work through the details.</p>
+        </div>
+        <div>
+          <div class="service-summary">
+            ${services.map(service => `<article><h3>${service.title}</h3><p>${service.description}</p></article>`).join('')}
+          </div>
+          <div class="home-services-action">
+            <button type="button" class="project-cta" data-inquire><span>Plan the shoot</span></button>
+          </div>
+        </div>
+      </section>
     </div>
   `;
 
@@ -221,9 +257,46 @@ if (page === 'home') {
   updateScrollFocus();
   motionPreference.addEventListener('change', updateScrollFocus);
 }
-const project=projects.find(p=>p.slug===new URLSearchParams(location.search).get('collection'));
-if(page==='projects' && project){document.title=project.title+' | Bogdan Maliagin';main.innerHTML=`<div class="head"><a class="textbtn" href="projects.html">All projects</a><h1>${project.title}</h1><p class="intro">${project.kind}</p></div><section class="section gallery">${project.photos.map(n=>`<button data-photo="${n}" title="Enlarge photograph">${pic(n)}</button>`).join('')}</section>`;}
-else if(page==='projects')main.innerHTML=`<div class="head"><div class="label">Bogdan Maliagin</div><h1>Projects</h1></div><section class="section">${cards()}</section>`;
+if (page === 'projects') {
+  const project = projects.find(entry => entry.slug === new URLSearchParams(location.search).get('collection'));
+  if (project) {
+    document.title = `${project.title} | Bogdan Maliagin`;
+    main.innerHTML = `
+      <header class="projects-heading">
+        <a class="textbtn" href="projects.html">All projects</a>
+        <h1>${project.title}</h1>
+        <p>${project.kind}</p>
+      </header>
+      <section class="project-sequence" aria-label="${project.title} photographs">
+        ${project.frames.map(({ layout, photos }, index) => `
+          <div class="project-frames project-frames--${layout}">
+            ${photos.map(name => `
+              <button type="button" class="project-frame" data-photo="${name}"
+                aria-label="Enlarge photograph: ${ktmPhotoTitles[name]}">
+                ${projectImage(name, { wide: layout === 'wide', eager: index === 0 })}
+              </button>
+            `).join('')}
+          </div>
+        `).join('')}
+      </section>`;
+  } else {
+    main.innerHTML = `
+      <header class="projects-heading"><h1>Projects</h1></header>
+      <div class="project-features">
+        ${projects.map(entry => `
+          <article>
+            <a class="project-feature" href="projects.html?collection=${entry.slug}" aria-label="View project: ${entry.title}">
+              ${projectImage(entry.cover, { wide: true, eager: true })}
+              <div class="project-feature-caption">
+                <div><h2>${entry.title}</h2><p>${entry.kind}</p></div>
+                <span>View project</span>
+              </div>
+            </a>
+          </article>
+        `).join('')}
+      </div>`;
+  }
+}
 if(page==='pricing') main.innerHTML=`<div class="head"><div class="label">Working together</div><h1>Pricing</h1><p class="intro">Tell me where the shoot will take place, what you have in mind, and how you plan to use the photographs so I can quote for your project.</p></div>${[['Personal sessions','Outdoor portraits for individuals, couples, and riders.'],['Outdoor & travel stories','Location photography for destinations, guides, and tourism operators.'],['Brand assignments','Campaign photography for outdoor, adventure, and motorsport brands.']].map(([title,desc])=>`<div class="price"><div><h2>${title}</h2><p>${desc}</p></div><button type="button" class="project-cta" data-inquire="${title}"><span>Request a quote</span></button></div>`).join('')}`;
 const isLocalPreview = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const dialog=document.querySelector('#inquiry'), viewer=document.querySelector('#viewer'), form=dialog.querySelector('form');
