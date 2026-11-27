@@ -314,10 +314,9 @@ body[data-page="home"] .masthead {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 20px;
+  gap: 8px 12px;
   margin-top: 20px;
 }
-.services-actions > a { overflow-wrap: anywhere; }
 
 footer {
   display: grid;
