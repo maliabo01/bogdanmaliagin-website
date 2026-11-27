@@ -251,44 +251,6 @@ if (page === 'projects' && project) {
     </div>`;
 }
 
-if (page === 'pricing') {
-  main.innerHTML = `
-    <header class="services-heading">
-      <h1>Let’s make<br>something together.</h1>
-      <p class="intro">Personal sessions, travel stories and brand photography. Each shoot is quoted around the location, the scope and how the photographs will be used.</p>
-    </header>
-    <section class="services-list" aria-label="Photography services">
-      ${services.map(service => `
-        <article class="price">
-          <div><h2>${service.title}</h2><p>${service.description}</p></div>
-          <button type="button" class="project-cta" data-inquire="${service.title}"><span>Plan a shoot</span></button>
-        </article>
-      `).join('')}
-    </section>
-    <section class="services-section" aria-labelledby="booking-title">
-      <h2 id="booking-title">From an idea to a shoot.</h2>
-      <ol class="booking-steps">
-        <li><h3>Share your idea</h3><p>Tell me what you have in mind, your preferred location and dates, and how you plan to use the photographs.</p></li>
-        <li><h3>Agree on the details</h3><p>We’ll discuss the scope and quote, including the shoot, image delivery and usage, before making plans.</p></li>
-        <li><h3>Make the photographs</h3><p>With the brief in place, we can focus on the people, the setting and the moments worth photographing.</p></li>
-      </ol>
-    </section>
-    <section class="services-section" aria-labelledby="quote-title">
-      <h2 id="quote-title">What goes into a quote?</h2>
-      <p>The location and travel involved, time on the shoot, the photographs you need and their intended use. Include what you know in your inquiry—we can work through the rest together.</p>
-      <p>Delivery timing and usage are agreed for your project before the shoot.</p>
-    </section>
-    <section class="services-section" aria-labelledby="inquiry-heading">
-      <h2 id="inquiry-heading">Let’s plan your next shoot.</h2>
-      <p>Tell me about the person, place or story you have in mind.</p>
-      <div class="services-actions">
-        <button type="button" class="project-cta" data-inquire><span>Plan a shoot</span></button>
-        <a class="text-link" href="https://wa.me/358440325505" target="_blank" rel="noopener noreferrer">Chat on WhatsApp</a>
-        <a class="text-link" href="mailto:bogdan.maliagin@gmail.com">bogdan.maliagin@gmail.com</a>
-      </div>
-    </section>`;
-}
-
 const isLocalPreview = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const dialog=document.querySelector('#inquiry'), viewer=document.querySelector('#viewer'), form=dialog.querySelector('form');
 dialog.querySelector('.note').hidden = !isLocalPreview;

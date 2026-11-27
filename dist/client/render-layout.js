@@ -10,6 +10,7 @@
   mobileStyles.media = isDesktop ? 'not all' : 'all';
 
   if (isDesktop) {
+    desktopLayout.content.querySelector('main').replaceWith(document.querySelector('main'));
     document.title = desktopLayout.dataset.title;
     document.body.replaceChildren(desktopLayout.content);
   } else {
